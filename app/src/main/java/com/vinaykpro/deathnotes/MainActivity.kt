@@ -134,10 +134,12 @@ val Context.dataStore by preferencesDataStore(name = "userprefs")
 val stringKey = stringPreferencesKey("promises")
 
 private val termsAgreedKey = booleanPreferencesKey("termsagreed")
-
+private lateinit var appOpenAdManager: AppOpenAdManager
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MobileAds.initialize(this)
+        appOpenAdManager = AppOpenAdManager()
         setContent {
             DeathNotesTheme {
                 // A surface container using the 'background' color from the theme
@@ -145,7 +147,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MobileAds.initialize(this)
                     val context = LocalContext.current;
                     val termsAgreed= remember { mutableStateOf(true) }
                     LaunchedEffect(Unit) {
@@ -163,6 +164,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("AppOpenAd", "onPause")
+        appOpenAdManager.loadAd(this)
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.i("AppOpenAd", "onRestart")
+        appOpenAdManager.showAd(this)
     }
 }
 val rules = listOf<String>(
